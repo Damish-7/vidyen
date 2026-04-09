@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vidyen/screens/splash/splash_view.dart';
 //import 'package:vidyen/utils/routes.dart';
 
 void main() {
@@ -12,9 +13,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return const GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: Routes.SPLASH,
+      title: 'flutter demo',
+    home:  SplashScreen(),
       //  getPages: AppRoutes.routes,
     );
   }

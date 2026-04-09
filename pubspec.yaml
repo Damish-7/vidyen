@@ -26,14 +26,14 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/
-    - assets/animations/
-  fonts:
-    - family: Sora
-      fonts:
-        - asset: assets/fonts/Sora-Regular.ttf
-        - asset: assets/fonts/Sora-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/Sora-Bold.ttf
-          weight: 700
+  #assets:
+    #- assets/images/
+    #- assets/animations/
+  #fonts:
+    #- family: Sora
+      #fonts:
+        #- asset: assets/fonts/Sora-Regular.ttf
+        #- asset: assets/fonts/Sora-SemiBold.ttf
+        #  weight: 600
+        #- asset: assets/fonts/Sora-Bold.ttf
+        # weight: 700
