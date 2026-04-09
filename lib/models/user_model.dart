@@ -7,7 +7,7 @@ class UserModel {
   final String? avatar;
   final String? designation;
   final String? institution;
- 
+
   UserModel({
     required this.id,
     required this.name,
@@ -17,8 +17,8 @@ class UserModel {
     this.designation,
     this.institution,
   });
- 
-   factory UserModel.fromJson(Map<String, dynamic> json) {
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id']?.toString() ?? '',
       name: json['name'] ?? '',
@@ -29,7 +29,6 @@ class UserModel {
       institution: json['institution'],
     );
   }
-  
 
   Map<String, dynamic> toJson() {
     return {
@@ -43,7 +42,6 @@ class UserModel {
     };
   }
 
-
   String get initials {
     final parts = name.trim().split(' ');
     if (parts.length >= 2) {
@@ -52,4 +50,3 @@ class UserModel {
     return name.isNotEmpty ? name[0].toUpperCase() : 'U';
   }
 }
- 
