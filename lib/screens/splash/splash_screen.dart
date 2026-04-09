@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_routes.dart';
+import '../../utils/responsive.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -67,26 +68,29 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final r = context.r;
 
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(gradient: AppColors.splashGradient),
         child: Stack(
           children: [
-            // Soft background orbs
+            // Soft background orbs — scale with screen
             Positioned(
               top: -100,
               right: -80,
-              child: _Orb(size: 260, color: AppColors.secondary.withOpacity(0.07)),
+              child: _Orb(
+                  size: r.width * 0.65,
+                  color: AppColors.secondary.withOpacity(0.07)),
             ),
             Positioned(
               bottom: -80,
               left: -60,
-              child: _Orb(size: 220, color: AppColors.accent.withOpacity(0.07)),
+              child: _Orb(
+                  size: r.width * 0.55,
+                  color: AppColors.accent.withOpacity(0.07)),
             ),
 
-            // Center content
             Center(
               child: AnimatedBuilder(
                 animation: _animController,
@@ -98,31 +102,36 @@ class _SplashScreenState extends State<SplashScreen>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Logo with glow
+                          // Logo
                           Container(
-                            width: 96,
-                            height: 96,
+                            width: r.logoSize + 24,
+                            height: r.logoSize + 24,
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [AppColors.secondary, AppColors.accent],
+                                colors: [
+                                  AppColors.secondary,
+                                  AppColors.accent
+                                ],
                               ),
-                              borderRadius: BorderRadius.circular(26),
+                              borderRadius: BorderRadius.circular(
+                                  (r.logoSize + 24) * 0.27),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.secondary.withOpacity(0.35),
+                                  color:
+                                      AppColors.secondary.withOpacity(0.35),
                                   blurRadius: 36,
                                   spreadRadius: 4,
                                 ),
                               ],
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Text(
                                 'V',
                                 style: TextStyle(
                                   fontFamily: 'Sora',
-                                  fontSize: 46,
+                                  fontSize: (r.logoSize + 24) * 0.47,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.background,
                                 ),
@@ -132,12 +141,11 @@ class _SplashScreenState extends State<SplashScreen>
 
                           const SizedBox(height: 28),
 
-                          // App name
-                          const Text(
+                          Text(
                             'VIDYEN',
                             style: TextStyle(
                               fontFamily: 'Sora',
-                              fontSize: 40,
+                              fontSize: r.appNameSize + 8,
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                               letterSpacing: 9,
@@ -146,14 +154,13 @@ class _SplashScreenState extends State<SplashScreen>
 
                           const SizedBox(height: 12),
 
-                          // Tagline with fade-in
                           Opacity(
                             opacity: _taglineFade.value,
-                            child: const Text(
+                            child: Text(
                               'C O N F E R E N C E   P O R T A L',
                               style: TextStyle(
                                 fontFamily: 'Sora',
-                                fontSize: 11,
+                                fontSize: r.sp(11),
                                 fontWeight: FontWeight.w500,
                                 color: AppColors.textSecondary,
                                 letterSpacing: 3,

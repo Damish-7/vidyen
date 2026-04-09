@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../controllers/auth_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_routes.dart';
+import '../../utils/responsive.dart';
 import '../../widgets/gradient_button.dart';
 import '../../widgets/vidyen_text_field.dart';
 
@@ -13,247 +14,53 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AuthController>();
+    final r = context.r;
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppColors.splashGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppColors.splashGradient),
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 50),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: r.screenPadding,
+                vertical: 24,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: r.topSpacing),
 
-                // Logo + title
-                Center(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [AppColors.secondary, AppColors.accent],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.secondary.withOpacity(0.35),
-                              blurRadius: 28,
-                              spreadRadius: 4,
-                            ),
-                          ],
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'V',
-                            style: TextStyle(
-                              fontFamily: 'Sora',
-                              fontSize: 34,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.background,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      ShaderMask(
-                        shaderCallback: (bounds) =>
-                            AppColors.primaryGradient.createShader(bounds),
-                        child: const Text(
-                          'VIDYEN',
-                          style: TextStyle(
-                            fontFamily: 'Sora',
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            letterSpacing: 8,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Conference Portal',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                          fontFamily: 'Sora',
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ],
+                  _Branding(r: r),
+
+                  const SizedBox(height: 40),
+
+                  // Fixed card width on tablet/desktop, full width on mobile
+                  SizedBox(
+                    width: r.cardWidth,
+                    child: _LoginCard(controller: controller, r: r),
                   ),
-                ),
 
-                const SizedBox(height: 48),
+                  const SizedBox(height: 24),
 
-                // Card
-                Container(
-                  padding: const EdgeInsets.all(28),
-                  decoration: BoxDecoration(
-                    gradient: AppColors.cardGradient,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: const Color(0xFF1E3A5F),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 30,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Welcome Back',
-                        style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Sign in to access the portal',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                          fontFamily: 'Sora',
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-
-                      // Identifier field
-                      VidyenTextField(
-                        controller: controller.identifierController,
-                        label: 'Email or Username',
-                        hint: 'Enter your email or username',
-                        prefixIcon: Icons.person_outline_rounded,
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: (_) => controller.clearError(),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Password field
-                      Obx(() => VidyenTextField(
-                            controller: controller.loginPasswordController,
-                            label: 'Password',
-                            hint: 'Enter your password',
-                            prefixIcon: Icons.lock_outline_rounded,
-                            isPassword: true,
-                            passwordVisible: controller.loginPasswordVisible.value,
-                            onTogglePassword: controller.toggleLoginPasswordVisibility,
-                            onChanged: (_) => controller.clearError(),
-                          )),
-
-                      const SizedBox(height: 8),
-
-                      // Forgot password
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            // TODO: implement forgot password
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            'Forgot Password?',
-                            style: TextStyle(
-                              color: AppColors.secondary,
-                              fontSize: 12,
-                              fontFamily: 'Sora',
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Error message
-                      Obx(() {
-                        if (controller.errorMessage.value.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: AppColors.error.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: AppColors.error.withOpacity(0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.error_outline_rounded,
-                                color: AppColors.error,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  controller.errorMessage.value,
-                                  style: const TextStyle(
-                                    color: AppColors.error,
-                                    fontSize: 12,
-                                    fontFamily: 'Sora',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-
-                      // Login button
-                      Obx(() => GradientButton(
-                            onPressed: controller.isLoading.value
-                                ? null
-                                : controller.login,
-                            isLoading: controller.isLoading.value,
-                            label: 'Sign In',
-                          )),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                // Register link
-                Center(
-                  child: Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         "Don't have an account? ",
                         style: TextStyle(
                           color: AppColors.textSecondary,
-                          fontSize: 13,
+                          fontSize: r.sp(13),
                           fontFamily: 'Sora',
                         ),
                       ),
                       GestureDetector(
                         onTap: () => Get.toNamed(AppRoutes.register),
-                        child: const Text(
+                        child: Text(
                           'Register',
                           style: TextStyle(
-                            color: AppColors.secondary,
-                            fontSize: 13,
+                            color: const Color.fromARGB(255, 96, 123, 161),
+                            fontSize: r.sp(13),
                             fontWeight: FontWeight.w700,
                             fontFamily: 'Sora',
                           ),
@@ -261,13 +68,212 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
 
-                const SizedBox(height: 40),
-              ],
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _Branding extends StatelessWidget {
+  final Responsive r;
+  const _Branding({required this.r});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: r.logoSize,
+          height: r.logoSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [AppColors.secondary, AppColors.accent],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.secondary.withOpacity(0.35),
+                blurRadius: 28,
+                spreadRadius: 4,
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              'V',
+              style: TextStyle(
+                fontFamily: 'Sora',
+                fontSize: r.logoSize * 0.47,
+                fontWeight: FontWeight.w700,
+                color: AppColors.background,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        ShaderMask(
+          shaderCallback: (bounds) =>
+              AppColors.primaryGradient.createShader(bounds),
+          child: Text(
+            'VIDYEN',
+            style: TextStyle(
+              fontFamily: 'Sora',
+              fontSize: r.appNameSize,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: 8,
+            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Conference Portal',
+          style: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: r.sp(13),
+            fontFamily: 'Sora',
+            letterSpacing: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LoginCard extends StatelessWidget {
+  final AuthController controller;
+  final Responsive r;
+  const _LoginCard({required this.controller, required this.r});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(r.cardPadding),
+      decoration: BoxDecoration(
+        gradient: AppColors.cardGradient,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFF1E3A5F)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Sign In ',
+            style: TextStyle(
+              fontFamily: 'Sora',
+              fontSize: r.sp(22),
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 18),
+          // Text(
+          //   'Sign in to access the portal',
+          //   style: TextStyle(
+          //     color: AppColors.textSecondary,
+          //     fontSize: r.sp(13),
+          //     fontFamily: 'Sora',
+          //   ),
+          // ),
+          //const SizedBox(height: 28),
+
+          VidyenTextField(
+            controller: controller.identifierController,
+            label: 'Email or Username',
+            hint: 'Enter your email or username',
+            prefixIcon: Icons.person_outline_rounded,
+            keyboardType: TextInputType.emailAddress,
+            onChanged: (_) => controller.clearError(),
+          ),
+          const SizedBox(height: 16),
+
+          Obx(() => VidyenTextField(
+                controller: controller.loginPasswordController,
+                label: 'Password',
+                hint: 'Enter your password',
+                prefixIcon: Icons.lock_outline_rounded,
+                isPassword: true,
+                passwordVisible: controller.loginPasswordVisible.value,
+                onTogglePassword: controller.toggleLoginPasswordVisibility,
+                onChanged: (_) => controller.clearError(),
+              )),
+
+          const SizedBox(height: 8),
+
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {},
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                'Forgot Password?',
+                style: TextStyle(
+                  color: AppColors.secondary,
+                  fontSize: r.sp(12),
+                  fontFamily: 'Sora',
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          Obx(() {
+            if (controller.errorMessage.value.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.error.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error_outline_rounded,
+                      color: AppColors.error, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      controller.errorMessage.value,
+                      style: TextStyle(
+                        color: AppColors.error,
+                        fontSize: r.sp(12),
+                        fontFamily: 'Sora',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+
+          Obx(() => GradientButton(
+                onPressed:
+                    controller.isLoading.value ? null : controller.login,
+                isLoading: controller.isLoading.value,
+                label: 'SIGN IN',
+              )),
+        ],
       ),
     );
   }
