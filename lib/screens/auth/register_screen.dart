@@ -49,7 +49,7 @@ class RegisterScreen extends StatelessWidget {
                         fontFamily: 'Sora',
                         fontSize: r.sp(20),
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: const Color.fromARGB(255, 229, 234, 248),
                       ),
                     ),
                   ],

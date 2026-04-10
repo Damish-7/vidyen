@@ -104,16 +104,9 @@ class _Branding extends StatelessWidget {
               ),
             ],
           ),
-          child: Center(
-            child: Text(
-              'V',
-              style: TextStyle(
-                fontFamily: 'Sora',
-                fontSize: r.logoSize * 0.47,
-                fontWeight: FontWeight.w700,
-                color: AppColors.background,
-              ),
-            ),
+          child: const Center(
+            child: Icon(Icons.medical_services_outlined,
+              color: Color.fromARGB(255, 124, 246, 242), size: 56),
           ),
         ),
         const SizedBox(height: 20),
@@ -126,7 +119,7 @@ class _Branding extends StatelessWidget {
               fontFamily: 'Sora',
               fontSize: r.appNameSize,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: const Color.fromARGB(255, 245, 244, 244),
               letterSpacing: 8,
             ),
           ),
