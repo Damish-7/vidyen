@@ -111,7 +111,7 @@ class _RegisterCard extends StatelessWidget {
           VidyenTextField(
             controller: controller.nameController,
             label: 'Full Name *',
-            hint: 'Dr. Jane Smith',
+            hint: 'Dr. Toni Kroos',
             prefixIcon: Icons.badge_outlined,
             onChanged: (_) => controller.clearError(),
           ),
@@ -120,7 +120,7 @@ class _RegisterCard extends StatelessWidget {
           VidyenTextField(
             controller: controller.emailController,
             label: 'Email Address *',
-            hint: 'jane@university.edu',
+            hint: 'toni@university.edu',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             onChanged: (_) => controller.clearError(),
@@ -130,7 +130,7 @@ class _RegisterCard extends StatelessWidget {
           VidyenTextField(
             controller: controller.usernameController,
             label: 'Username *',
-            hint: 'janesmith',
+            hint: 'ToniKroos',
             prefixIcon: Icons.alternate_email_rounded,
             onChanged: (_) => controller.clearError(),
           ),

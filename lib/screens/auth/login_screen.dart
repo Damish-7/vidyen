@@ -119,7 +119,7 @@ class _Branding extends StatelessWidget {
               fontFamily: 'Sora',
               fontSize: r.appNameSize,
               fontWeight: FontWeight.w700,
-              color: const Color.fromARGB(255, 245, 244, 244),
+              color: const Color.fromARGB(255, 244, 245, 245),
               letterSpacing: 8,
             ),
           ),
