@@ -177,7 +177,7 @@ class AppColors {
       Color.fromARGB(255, 46, 41, 146),
     ],
   );
-
+  
   static const LinearGradient cardGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,

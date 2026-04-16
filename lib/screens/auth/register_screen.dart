@@ -169,7 +169,8 @@ class _RegisterCard extends StatelessWidget {
                 passwordVisible: controller.regPasswordVisible.value,
                 onTogglePassword: controller.toggleRegPasswordVisibility,
                 onChanged: (_) => controller.clearError(),
-              )),
+              )
+            ),
           const SizedBox(height: 14),
 
           Obx(() => VidyenTextField(
