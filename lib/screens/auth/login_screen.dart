@@ -59,7 +59,7 @@ class LoginScreen extends StatelessWidget {
                         child: Text(
                           'Register',
                           style: TextStyle(
-                            color: const Color.fromARGB(255, 96, 123, 161),
+                            color: AppColors.secondary,
                             fontSize: r.sp(13),
                             fontWeight: FontWeight.w700,
                             fontFamily: 'Sora',
@@ -104,9 +104,16 @@ class _Branding extends StatelessWidget {
               ),
             ],
           ),
-          child: const Center(
-            child: Icon(Icons.medical_services_outlined,
-              color: Color.fromARGB(255, 124, 246, 242), size: 56),
+          child: Center(
+            child: Text(
+              'V',
+              style: TextStyle(
+                fontFamily: 'Sora',
+                fontSize: r.logoSize * 0.47,
+                fontWeight: FontWeight.w700,
+                color: AppColors.background,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -119,7 +126,7 @@ class _Branding extends StatelessWidget {
               fontFamily: 'Sora',
               fontSize: r.appNameSize,
               fontWeight: FontWeight.w700,
-              color: const Color.fromARGB(255, 244, 245, 245),
+              color: Colors.white,
               letterSpacing: 8,
             ),
           ),
@@ -164,7 +171,7 @@ class _LoginCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Sign In ',
+            'Welcome Back',
             style: TextStyle(
               fontFamily: 'Sora',
               fontSize: r.sp(22),
@@ -172,16 +179,16 @@ class _LoginCard extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 18),
-          // Text(
-          //   'Sign in to access the portal',
-          //   style: TextStyle(
-          //     color: AppColors.textSecondary,
-          //     fontSize: r.sp(13),
-          //     fontFamily: 'Sora',
-          //   ),
-          // ),
-          //const SizedBox(height: 28),
+          const SizedBox(height: 6),
+          Text(
+            'Sign in to access the portal',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: r.sp(13),
+              fontFamily: 'Sora',
+            ),
+          ),
+          const SizedBox(height: 28),
 
           VidyenTextField(
             controller: controller.identifierController,
@@ -264,7 +271,7 @@ class _LoginCard extends StatelessWidget {
                 onPressed:
                     controller.isLoading.value ? null : controller.login,
                 isLoading: controller.isLoading.value,
-                label: 'SIGN IN',
+                label: 'Sign In',
               )),
         ],
       ),

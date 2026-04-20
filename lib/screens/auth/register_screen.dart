@@ -49,7 +49,7 @@ class RegisterScreen extends StatelessWidget {
                         fontFamily: 'Sora',
                         fontSize: r.sp(20),
                         fontWeight: FontWeight.w700,
-                        color: const Color.fromARGB(255, 229, 234, 248),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -111,7 +111,7 @@ class _RegisterCard extends StatelessWidget {
           VidyenTextField(
             controller: controller.nameController,
             label: 'Full Name *',
-            hint: 'Dr. Toni Kroos',
+            hint: 'Dr. Jane Smith',
             prefixIcon: Icons.badge_outlined,
             onChanged: (_) => controller.clearError(),
           ),
@@ -120,7 +120,7 @@ class _RegisterCard extends StatelessWidget {
           VidyenTextField(
             controller: controller.emailController,
             label: 'Email Address *',
-            hint: 'toni@university.edu',
+            hint: 'jane@university.edu',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             onChanged: (_) => controller.clearError(),
@@ -130,7 +130,7 @@ class _RegisterCard extends StatelessWidget {
           VidyenTextField(
             controller: controller.usernameController,
             label: 'Username *',
-            hint: 'ToniKroos',
+            hint: 'janesmith',
             prefixIcon: Icons.alternate_email_rounded,
             onChanged: (_) => controller.clearError(),
           ),
@@ -169,8 +169,7 @@ class _RegisterCard extends StatelessWidget {
                 passwordVisible: controller.regPasswordVisible.value,
                 onTogglePassword: controller.toggleRegPasswordVisibility,
                 onChanged: (_) => controller.clearError(),
-              )
-            ),
+              )),
           const SizedBox(height: 14),
 
           Obx(() => VidyenTextField(

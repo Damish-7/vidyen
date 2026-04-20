@@ -1,7 +1,7 @@
 // lib/controllers/auth_controller.dart
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import '../models/user_model.dart';
+import '../models/hive_models/user_hive_model.dart';
 import '../services/auth_service.dart';
 import '../utils/app_routes.dart';
 
@@ -9,7 +9,7 @@ class AuthController extends GetxController {
   final AuthService _authService = AuthService();
 
   // ── Observables ────────────────────────────────────────────────────────────
-  final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
+  final Rx<UserHiveModel?> currentUser = Rx<UserHiveModel?>(null);
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
 
@@ -29,7 +29,12 @@ class AuthController extends GetxController {
   final RxBool regPasswordVisible = false.obs;
   final RxBool confirmPasswordVisible = false.obs;
 
-  // ── Lifecycle ──────────────────────────────────────────────────────────────
+  @override
+  void onInit() {
+    super.onInit();
+    loadCurrentUser();
+  }
+
   @override
   void onClose() {
     identifierController.dispose();
@@ -51,7 +56,6 @@ class AuthController extends GetxController {
       errorMessage.value = 'Please fill in all fields';
       return;
     }
-
     isLoading.value = true;
     errorMessage.value = '';
 
@@ -62,8 +66,8 @@ class AuthController extends GetxController {
 
     isLoading.value = false;
 
-    if (result['success']) {
-      currentUser.value = result['user'] as UserModel;
+    if (result['success'] == true) {
+      currentUser.value = result['user'] as UserHiveModel;
       Get.offAllNamed(AppRoutes.dashboard);
     } else {
       errorMessage.value = result['message'];
@@ -78,12 +82,10 @@ class AuthController extends GetxController {
       errorMessage.value = 'Please fill in all required fields';
       return;
     }
-
     if (regPasswordController.text != confirmPasswordController.text) {
       errorMessage.value = 'Passwords do not match';
       return;
     }
-
     if (regPasswordController.text.length < 6) {
       errorMessage.value = 'Password must be at least 6 characters';
       return;
@@ -103,14 +105,17 @@ class AuthController extends GetxController {
 
     isLoading.value = false;
 
-    if (result['success']) {
+    if (result['success'] == true) {
+      _clearRegisterForm();
       Get.back();
       Get.snackbar(
-        'Success',
-        'Account created! Please log in.',
+        'Account Created!',
+        'You can now sign in with your credentials.',
         backgroundColor: const Color(0xFF00C9B1),
         colorText: const Color(0xFF060E1E),
         snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
       );
     } else {
       errorMessage.value = result['message'];
@@ -125,19 +130,26 @@ class AuthController extends GetxController {
     Get.offAllNamed(AppRoutes.login);
   }
 
-  Future<void> loadCurrentUser() async {
-    final user = await _authService.getCurrentUser();
+  void loadCurrentUser() {
+    final user = _authService.getCurrentUser();
     currentUser.value = user;
+  }
+
+  void _clearRegisterForm() {
+    nameController.clear();
+    emailController.clear();
+    usernameController.clear();
+    regPasswordController.clear();
+    confirmPasswordController.clear();
+    designationController.clear();
+    institutionController.clear();
   }
 
   void toggleLoginPasswordVisibility() =>
       loginPasswordVisible.value = !loginPasswordVisible.value;
-
   void toggleRegPasswordVisibility() =>
       regPasswordVisible.value = !regPasswordVisible.value;
-
   void toggleConfirmPasswordVisibility() =>
       confirmPasswordVisible.value = !confirmPasswordVisible.value;
-
   void clearError() => errorMessage.value = '';
 }

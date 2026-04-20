@@ -1,37 +1,71 @@
 // lib/services/auth_service.dart
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import '../models/user_model.dart';
-import '../utils/app_constants.dart';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
+import 'package:hive/hive.dart';
+import '../models/hive_models/user_hive_model.dart';
+import '../models/hive_models/session_hive_model.dart';
+import '../models/hive_models/settings_hive_model.dart';
+import '../utils/hive_boxes.dart';
 
 class AuthService {
+  Box<UserHiveModel> get _usersBox =>
+      Hive.box<UserHiveModel>(HiveBoxes.users);
+  Box<SessionHiveModel> get _sessionBox =>
+      Hive.box<SessionHiveModel>(HiveBoxes.session);
+  Box<SettingsHiveModel> get _settingsBox =>
+      Hive.box<SettingsHiveModel>(HiveBoxes.settings);
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password + 'vidyen_salt_2024');
+    return sha256.convert(bytes).toString();
+  }
+
+  String _generateToken() {
+    final rand = Random.secure();
+    final values = List<int>.generate(32, (_) => rand.nextInt(256));
+    return base64Url.encode(values);
+  }
+
   // ── Login ──────────────────────────────────────────────────────────────────
   Future<Map<String, dynamic>> login({
-    required String identifier, // email or username
+    required String identifier,
     required String password,
   }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('${AppConstants.baseUrl}/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'identifier': identifier,
-          'password': password,
-        }),
-      );
+    await Future.delayed(const Duration(milliseconds: 600)); // simulate network
 
-      final data = jsonDecode(response.body);
+    final id = identifier.trim().toLowerCase();
+    final hash = _hashPassword(password);
 
-      if (response.statusCode == 200 && data['token'] != null) {
-        await _saveSession(data['token'], data['user']);
-        return {'success': true, 'user': UserModel.fromJson(data['user'])};
-      } else {
-        return {'success': false, 'message': data['message'] ?? 'Login failed'};
+    // Find user by email or username
+    UserHiveModel? user;
+    for (final u in _usersBox.values) {
+      if (u.email.toLowerCase() == id || (u.username?.toLowerCase() == id)) {
+        user = u;
+        break;
       }
-    } catch (e) {
-      return {'success': false, 'message': 'Network error. Please try again.'};
     }
+
+    if (user == null) {
+      return {'success': false, 'message': 'No account found with that email or username.'};
+    }
+
+    if (user.passwordHash != hash) {
+      return {'success': false, 'message': 'Incorrect password. Please try again.'};
+    }
+
+    // Save session
+    final token = _generateToken();
+    final session = SessionHiveModel(
+      userId: user.id,
+      token: token,
+      loginAt: DateTime.now(),
+      isLoggedIn: true,
+    );
+    await _sessionBox.put('current', session);
+
+    return {'success': true, 'user': user};
   }
 
   // ── Register ───────────────────────────────────────────────────────────────
@@ -43,63 +77,76 @@ class AuthService {
     String? designation,
     String? institution,
   }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('${AppConstants.baseUrl}/auth/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'name': name,
-          'email': email,
-          'username': username,
-          'password': password,
-          'designation': designation,
-          'institution': institution,
-        }),
-      );
+    await Future.delayed(const Duration(milliseconds: 800));
 
-      final data = jsonDecode(response.body);
+    final emailLower = email.trim().toLowerCase();
+    final usernameLower = username.trim().toLowerCase();
 
-      if (response.statusCode == 201) {
-        return {'success': true, 'message': data['message'] ?? 'Registration successful'};
-      } else {
-        return {'success': false, 'message': data['message'] ?? 'Registration failed'};
+    // Check duplicates
+    for (final u in _usersBox.values) {
+      if (u.email.toLowerCase() == emailLower) {
+        return {'success': false, 'message': 'An account with this email already exists.'};
       }
-    } catch (e) {
-      return {'success': false, 'message': 'Network error. Please try again.'};
+      if (u.username?.toLowerCase() == usernameLower) {
+        return {'success': false, 'message': 'This username is already taken.'};
+      }
     }
+
+    final id = 'usr_${DateTime.now().millisecondsSinceEpoch}';
+    final newUser = UserHiveModel(
+      id: id,
+      name: name.trim(),
+      email: emailLower,
+      username: usernameLower,
+      designation: designation?.trim(),
+      institution: institution?.trim(),
+      passwordHash: _hashPassword(password),
+    );
+
+    await _usersBox.put(id, newUser);
+
+    // Init settings for new user
+    if (_settingsBox.get('app_settings') == null) {
+      await _settingsBox.put(
+        'app_settings',
+        SettingsHiveModel(lastSyncAt: DateTime.now()),
+      );
+    }
+
+    return {'success': true, 'message': 'Account created successfully!'};
   }
 
   // ── Session ────────────────────────────────────────────────────────────────
-  Future<void> _saveSession(String token, Map<String, dynamic> userData) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(AppConstants.tokenKey, token);
-    await prefs.setString(AppConstants.userKey, jsonEncode(userData));
-    await prefs.setBool(AppConstants.isLoggedInKey, true);
+  bool isLoggedIn() {
+    final session = _sessionBox.get('current');
+    return session?.isLoggedIn == true;
   }
 
-  Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(AppConstants.isLoggedInKey) ?? false;
+  UserHiveModel? getCurrentUser() {
+    final session = _sessionBox.get('current');
+    if (session == null || !session.isLoggedIn) return null;
+    return _usersBox.get(session.userId);
   }
 
-  Future<UserModel?> getCurrentUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString(AppConstants.userKey);
-    if (userJson != null) {
-      return UserModel.fromJson(jsonDecode(userJson));
-    }
-    return null;
-  }
-
-  Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(AppConstants.tokenKey);
+  String? getToken() {
+    return _sessionBox.get('current')?.token;
   }
 
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(AppConstants.tokenKey);
-    await prefs.remove(AppConstants.userKey);
-    await prefs.setBool(AppConstants.isLoggedInKey, false);
+    final session = _sessionBox.get('current');
+    if (session != null) {
+      session.isLoggedIn = false;
+      await session.save();
+    }
+  }
+
+  // ── Settings ───────────────────────────────────────────────────────────────
+  SettingsHiveModel getSettings() {
+    return _settingsBox.get('app_settings') ??
+        SettingsHiveModel(lastSyncAt: DateTime.now());
+  }
+
+  Future<void> updateSettings(SettingsHiveModel settings) async {
+    await _settingsBox.put('app_settings', settings);
   }
 }
