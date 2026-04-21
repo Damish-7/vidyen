@@ -5,6 +5,7 @@ import '../../controllers/abstracts_controller.dart';
 import '../../models/abstract_model.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/responsive.dart';
+import '../submit_abstract/submit_abstract_screen.dart';
 
 class AbstractsScreen extends StatelessWidget {
   const AbstractsScreen({super.key});
@@ -14,126 +15,190 @@ class AbstractsScreen extends StatelessWidget {
     final controller = Get.find<AbstractsController>();
     final r = context.r;
 
-    return Column(children: [
+    return Stack(children: [
+      Column(children: [
 
-      // ── Summary bar — each .value read directly inside Obx ───────────────
-      Obx(() => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            color: AppColors.primary,
-            child: Row(children: [
-              _Chip(label: 'Total',    value: controller.totalCount.value,    color: AppColors.textSecondary),
-              const SizedBox(width: 10),
-              _Chip(label: 'Accepted', value: controller.acceptedCount.value, color: AppColors.success),
-              const SizedBox(width: 10),
-              _Chip(label: 'Pending',  value: controller.pendingCount.value,  color: AppColors.warning),
-              const SizedBox(width: 10),
-              _Chip(label: 'Rejected', value: controller.rejectedCount.value, color: AppColors.error),
-            ]),
-          )),
+        // ── Summary bar ──────────────────────────────────────────────────
+        Obx(() => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              color: AppColors.primary,
+              child: Row(children: [
+                _Chip(label: 'Total',    value: controller.totalCount.value,    color: AppColors.textSecondary),
+                const SizedBox(width: 10),
+                _Chip(label: 'Accepted', value: controller.acceptedCount.value, color: AppColors.success),
+                const SizedBox(width: 10),
+                _Chip(label: 'Pending',  value: controller.pendingCount.value,  color: AppColors.warning),
+                const SizedBox(width: 10),
+                _Chip(label: 'Rejected', value: controller.rejectedCount.value, color: AppColors.error),
+              ]),
+            )),
 
-      // ── Filter chips ──────────────────────────────────────────────────────
-      Obx(() {
-        final selected = controller.selectedFilter.value; // read observable
-        return SizedBox(
-          height: 48,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            itemCount: controller.filters.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) {
-              final f      = controller.filters[i];
-              final active = selected == f;
-              return GestureDetector(
-                onTap: () => controller.setFilter(f),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: active ? AppColors.secondary : AppColors.cardBg,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                        color: active
-                            ? AppColors.secondary
-                            : AppColors.textMuted.withOpacity(0.3)),
-                  ),
-                  child: Text(f,
-                      style: TextStyle(
-                          fontFamily: 'Sora',
-                          fontSize: r.sp(12),
-                          fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-                          color: active ? AppColors.background : AppColors.textSecondary)),
-                ),
-              );
-            },
-          ),
-        );
-      }),
-
-      // ── List ──────────────────────────────────────────────────────────────
-      Expanded(
-        child: Obx(() {
-          final loading  = controller.isLoading.value;
-          final error    = controller.error.value;
-          final list     = controller.abstracts.toList(); // read observable list
-
-          if (loading) {
-            return const Center(
-                child: CircularProgressIndicator(color: AppColors.secondary));
-          }
-
-          if (error.isNotEmpty) {
-            return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.wifi_off_rounded,
-                  color: AppColors.textMuted, size: 48),
-              const SizedBox(height: 12),
-              Text(error,
-                  style: TextStyle(color: AppColors.textMuted,
-                      fontSize: r.sp(13), fontFamily: 'Sora'),
-                  textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              GestureDetector(
-                onTap: controller.fetchAbstracts,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: const Text('Retry',
-                      style: TextStyle(fontFamily: 'Sora',
-                          color: AppColors.background,
-                          fontWeight: FontWeight.w600)),
-                ),
-              ),
-            ]));
-          }
-
-          if (list.isEmpty) {
-            return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.article_outlined,
-                  color: AppColors.textMuted, size: 48),
-              const SizedBox(height: 12),
-              Text('No abstracts found',
-                  style: TextStyle(color: AppColors.textMuted,
-                      fontSize: r.sp(14), fontFamily: 'Sora')),
-            ]));
-          }
-
-          return RefreshIndicator(
-            onRefresh: controller.fetchAbstracts,
-            color: AppColors.secondary,
-            backgroundColor: AppColors.surface,
+        // ── Filter chips ────────────────────────────────────────────────
+        Obx(() {
+          final selected = controller.selectedFilter.value;
+          return SizedBox(
+            height: 48,
             child: ListView.separated(
-              padding: EdgeInsets.all(r.isDesktop ? 24 : 16),
-              itemCount: list.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (_, i) => _AbstractCard(abstract: list[i], r: r),
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              itemCount: controller.filters.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, i) {
+                final f      = controller.filters[i];
+                final active = selected == f;
+                return GestureDetector(
+                  onTap: () => controller.setFilter(f),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: active ? AppColors.secondary : AppColors.cardBg,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: active
+                          ? AppColors.secondary
+                          : AppColors.textMuted.withOpacity(0.3)),
+                    ),
+                    child: Text(f,
+                        style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(12),
+                            fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+                            color: active ? AppColors.background : AppColors.textSecondary)),
+                  ),
+                );
+              },
             ),
           );
         }),
+
+        // ── List ─────────────────────────────────────────────────────────
+        Expanded(
+          child: Obx(() {
+            final loading = controller.isLoading.value;
+            final error   = controller.error.value;
+            final list    = controller.abstracts.toList();
+
+            if (loading) {
+              return const Center(child: CircularProgressIndicator(
+                  color: AppColors.secondary));
+            }
+            if (error.isNotEmpty) {
+              return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.wifi_off_rounded,
+                    color: AppColors.textMuted, size: 48),
+                const SizedBox(height: 12),
+                Text(error, style: TextStyle(color: AppColors.textMuted,
+                    fontSize: r.sp(13), fontFamily: 'Sora'),
+                    textAlign: TextAlign.center),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: controller.fetchAbstracts,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(10)),
+                    child: const Text('Retry', style: TextStyle(fontFamily: 'Sora',
+                        color: AppColors.background, fontWeight: FontWeight.w600)),
+                  ),
+                ),
+              ]));
+            }
+            if (list.isEmpty) {
+              return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.article_outlined,
+                    color: AppColors.textMuted, size: 48),
+                const SizedBox(height: 12),
+                Text('No abstracts found', style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: r.sp(14), fontFamily: 'Sora')),
+                const SizedBox(height: 20),
+                _SubmitButton(controller: controller, r: r),
+              ]));
+            }
+            return RefreshIndicator(
+              onRefresh: controller.fetchAbstracts,
+              color: AppColors.secondary,
+              backgroundColor: AppColors.surface,
+              child: ListView.separated(
+                padding: EdgeInsets.fromLTRB(
+                    r.isDesktop ? 24 : 16,
+                    r.isDesktop ? 24 : 16,
+                    r.isDesktop ? 24 : 16,
+                    90), // extra bottom for FAB
+                itemCount: list.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (_, i) => _AbstractCard(abstract: list[i], r: r),
+              ),
+            );
+          }),
+        ),
+      ]),
+
+      // ── FAB — Submit Abstract ─────────────────────────────────────────
+      Positioned(
+        bottom: 16, right: 16,
+        child: GestureDetector(
+          onTap: () async {
+            final submitted = await Get.to<bool>(
+                () => const SubmitAbstractScreen());
+            if (submitted == true) {
+              controller.fetchAbstracts();
+            }
+          },
+          child: Container(
+            height: 52,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient,
+              borderRadius: BorderRadius.circular(26),
+              boxShadow: [BoxShadow(
+                  color: AppColors.secondary.withOpacity(0.4),
+                  blurRadius: 16, offset: const Offset(0, 6))],
+            ),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              const Icon(Icons.add_rounded, color: AppColors.background, size: 22),
+              const SizedBox(width: 8),
+              Text('Submit Abstract',
+                  style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(13),
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.background)),
+            ]),
+          ),
+        ),
       ),
     ]);
+  }
+}
+
+// ── Submit button (shown in empty state) ─────────────────────────────────────
+class _SubmitButton extends StatelessWidget {
+  final AbstractsController controller;
+  final Responsive r;
+  const _SubmitButton({required this.controller, required this.r});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        final submitted = await Get.to<bool>(() => const SubmitAbstractScreen());
+        if (submitted == true) controller.fetchAbstracts();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: AppColors.primaryGradient,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [BoxShadow(
+              color: AppColors.secondary.withOpacity(0.3),
+              blurRadius: 12, offset: const Offset(0, 4))],
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.add_rounded, color: AppColors.background, size: 20),
+          const SizedBox(width: 8),
+          Text('Submit Your First Abstract',
+              style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(13),
+                  fontWeight: FontWeight.w700, color: AppColors.background)),
+        ]),
+      ),
+    );
   }
 }
 
@@ -156,7 +221,7 @@ class _Chip extends StatelessWidget {
       ]);
 }
 
-// ── Abstract card — pure display, no Obx needed ───────────────────────────────
+// ── Abstract card ─────────────────────────────────────────────────────────────
 class _AbstractCard extends StatelessWidget {
   final AbstractModel abstract;
   final Responsive r;
@@ -196,10 +261,7 @@ class _AbstractCard extends StatelessWidget {
         border: Border.all(color: _statusColor.withOpacity(0.2)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-        // Badges row — uses Wrap so it never overflows
         Wrap(spacing: 8, runSpacing: 6, children: [
-          // Status badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -209,13 +271,11 @@ class _AbstractCard extends StatelessWidget {
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(_statusIcon, color: _statusColor, size: 12),
               const SizedBox(width: 4),
-              Text(
-                abstract.status[0].toUpperCase() + abstract.status.substring(1),
-                style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(11),
-                    color: _statusColor, fontWeight: FontWeight.w600)),
+              Text(abstract.status[0].toUpperCase() + abstract.status.substring(1),
+                  style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(11),
+                      color: _statusColor, fontWeight: FontWeight.w600)),
             ]),
           ),
-          // Presentation type badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -227,7 +287,6 @@ class _AbstractCard extends StatelessWidget {
                 style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(11),
                     color: AppColors.accent)),
           ),
-          // Category badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -239,14 +298,11 @@ class _AbstractCard extends StatelessWidget {
                     color: AppColors.secondary)),
           ),
         ]),
-
         const SizedBox(height: 12),
-
         Text(abstract.title,
             style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(14),
                 fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
         const SizedBox(height: 6),
-
         Text(abstract.authors,
             style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(12),
                 color: AppColors.accent)),
@@ -254,13 +310,11 @@ class _AbstractCard extends StatelessWidget {
             style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(11),
                 color: AppColors.textSecondary)),
         const SizedBox(height: 10),
-
         Text(abstract.abstractText,
             maxLines: 3, overflow: TextOverflow.ellipsis,
             style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(12),
                 color: AppColors.textSecondary, height: 1.5)),
         const SizedBox(height: 10),
-
         Row(children: [
           const Icon(Icons.schedule_rounded, color: AppColors.textMuted, size: 13),
           const SizedBox(width: 4),
