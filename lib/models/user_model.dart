@@ -1,6 +1,6 @@
 // lib/models/user_model.dart
 class UserModel {
-  final String id;
+  final int id;
   final String name;
   final String email;
   final String? username;
@@ -18,35 +18,29 @@ class UserModel {
     this.institution,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id']?.toString() ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      username: json['username'],
-      avatar: json['avatar'],
-      designation: json['designation'],
-      institution: json['institution'],
-    );
-  }
+  factory UserModel.fromJson(Map<String, dynamic> j) => UserModel(
+        id:          int.tryParse(j['id'].toString()) ?? 0,
+        name:        j['name']        ?? '',
+        email:       j['email']       ?? '',
+        username:    j['username'],
+        avatar:      j['avatar'],
+        designation: j['designation'],
+        institution: j['institution'],
+      );
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'email': email,
-      'username': username,
-      'avatar': avatar,
-      'designation': designation,
-      'institution': institution,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'id':          id,
+        'name':        name,
+        'email':       email,
+        'username':    username,
+        'avatar':      avatar,
+        'designation': designation,
+        'institution': institution,
+      };
 
   String get initials {
     final parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     return name.isNotEmpty ? name[0].toUpperCase() : 'U';
   }
 }

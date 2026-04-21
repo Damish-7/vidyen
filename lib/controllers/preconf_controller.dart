@@ -1,57 +1,69 @@
 // lib/controllers/preconf_controller.dart
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
-import '../models/hive_models/preconf_hive_model.dart';
-import '../utils/hive_boxes.dart';
+import '../models/preconf_model.dart';
+import '../services/api_service.dart';
 
 class PreConfController extends GetxController {
-  Box<PreConfHiveModel> get _box => Hive.box<PreConfHiveModel>(HiveBoxes.preconf);
+  final ApiService _api = ApiService();
 
-  final RxList<PreConfHiveModel> sessions = <PreConfHiveModel>[].obs;
+  final RxList<PreConfModel> sessions = <PreConfModel>[].obs;
   final RxBool isLoading = false.obs;
+  final RxString error = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadSessions();
+    fetchSessions();
   }
 
-  void loadSessions() {
-    sessions.value = _box.values.toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+  Future<void> fetchSessions() async {
+    isLoading.value = true;
+    error.value = '';
+    final result = await _api.get('/preconf');
+    isLoading.value = false;
+    if (result['success'] == true) {
+      sessions.value = (result['data'] as List)
+          .map((j) => PreConfModel.fromJson(j))
+          .toList();
+    } else {
+      error.value = result['message'] ?? 'Failed to load sessions.';
+    }
   }
 
-  Future<void> toggleRegistration(PreConfHiveModel session) async {
-    if (session.isFull && !session.isRegistered) {
-      Get.snackbar('Session Full',
-          'This session has reached maximum capacity.',
+  Future<void> toggleRegistration(PreConfModel session) async {
+    if (session.isFull) {
+      Get.snackbar('Session Full', 'This session has reached maximum capacity.',
           backgroundColor: const Color(0xFFFF4D6D),
-          colorText: const Color(0xFFF0F4FF),
+          colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(16),
-          borderRadius: 12);
+          margin: const EdgeInsets.all(16), borderRadius: 12);
       return;
     }
-    session.isRegistered = !session.isRegistered;
-    session.registeredCount += session.isRegistered ? 1 : -1;
-    await session.save();
-    loadSessions();
-    Get.snackbar(
-      session.isRegistered ? 'Registered!' : 'Registration Cancelled',
-      session.isRegistered
-          ? 'You are registered for "${session.title}"'
-          : 'You have been removed from "${session.title}"',
-      backgroundColor: session.isRegistered
-          ? const Color(0xFF00C9B1)
-          : const Color(0xFF4F8EF7),
-      colorText: const Color(0xFF060E1E),
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
-    );
+
+    final result = session.isRegistered
+        ? await _api.delete('/preconf/${session.id}/register')
+        : await _api.post('/preconf/${session.id}/register', {});
+
+    if (result['success'] == true) {
+      Get.snackbar(
+        session.isRegistered ? 'Cancelled' : 'Registered!',
+        result['message'] ?? '',
+        backgroundColor: session.isRegistered
+            ? const Color(0xFF4F8EF7)
+            : const Color(0xFF00C9B1),
+        colorText: const Color(0xFF060E1E),
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16), borderRadius: 12,
+      );
+      await fetchSessions();
+    } else {
+      Get.snackbar('Error', result['message'] ?? 'Something went wrong.',
+          backgroundColor: const Color(0xFFFF4D6D),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16), borderRadius: 12);
+    }
   }
 
   int get registeredCount => sessions.where((s) => s.isRegistered).length;

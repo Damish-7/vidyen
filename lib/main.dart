@@ -7,29 +7,18 @@ import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/dashboard/dashboard_screen.dart';
-import 'services/hive_service.dart';
-import 'services/mock_data_seeder.dart';
 import 'utils/app_routes.dart';
 import 'utils/app_theme.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // ── Hive setup ─────────────────────────────────────────────────────────────
-  await HiveService.init();
-  await MockDataSeeder.seedIfEmpty(); // seeds only on first launch
-
-  // ── UI system config ───────────────────────────────────────────────────────
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFF0A1628),
-      systemNavigationBarIconBrightness: Brightness.light,
-    ),
-  );
-
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    systemNavigationBarColor: Color(0xFF0A1628),
+    systemNavigationBarIconBrightness: Brightness.light,
+  ));
   runApp(const VidyenApp());
 }
 
@@ -69,7 +58,6 @@ class VidyenApp extends StatelessWidget {
           transitionDuration: const Duration(milliseconds: 350),
         ),
       ],
-      defaultTransition: Transition.fadeIn,
     );
   }
 }

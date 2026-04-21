@@ -1,71 +1,30 @@
 // lib/services/auth_service.dart
 import 'dart:convert';
-import 'dart:math';
-import 'package:crypto/crypto.dart';
-import 'package:hive/hive.dart';
-import '../models/hive_models/user_hive_model.dart';
-import '../models/hive_models/session_hive_model.dart';
-import '../models/hive_models/settings_hive_model.dart';
-import '../utils/hive_boxes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/user_model.dart';
+import '../utils/app_constants.dart';
+import 'api_service.dart';
 
 class AuthService {
-  Box<UserHiveModel> get _usersBox =>
-      Hive.box<UserHiveModel>(HiveBoxes.users);
-  Box<SessionHiveModel> get _sessionBox =>
-      Hive.box<SessionHiveModel>(HiveBoxes.session);
-  Box<SettingsHiveModel> get _settingsBox =>
-      Hive.box<SettingsHiveModel>(HiveBoxes.settings);
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  String _hashPassword(String password) {
-    final bytes = utf8.encode(password + 'vidyen_salt_2024');
-    return sha256.convert(bytes).toString();
-  }
-
-  String _generateToken() {
-    final rand = Random.secure();
-    final values = List<int>.generate(32, (_) => rand.nextInt(256));
-    return base64Url.encode(values);
-  }
+  final ApiService _api = ApiService();
 
   // ── Login ──────────────────────────────────────────────────────────────────
   Future<Map<String, dynamic>> login({
     required String identifier,
     required String password,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 600)); // simulate network
+    final result = await _api.post('/auth/login', {
+      'identifier': identifier,
+      'password':   password,
+    }, auth: false);
 
-    final id = identifier.trim().toLowerCase();
-    final hash = _hashPassword(password);
-
-    // Find user by email or username
-    UserHiveModel? user;
-    for (final u in _usersBox.values) {
-      if (u.email.toLowerCase() == id || (u.username?.toLowerCase() == id)) {
-        user = u;
-        break;
-      }
+    if (result['success'] == true) {
+      final token = result['data']['token'] as String;
+      final user  = UserModel.fromJson(result['data']['user']);
+      await _saveSession(token, user);
+      return {'success': true, 'user': user};
     }
-
-    if (user == null) {
-      return {'success': false, 'message': 'No account found with that email or username.'};
-    }
-
-    if (user.passwordHash != hash) {
-      return {'success': false, 'message': 'Incorrect password. Please try again.'};
-    }
-
-    // Save session
-    final token = _generateToken();
-    final session = SessionHiveModel(
-      userId: user.id,
-      token: token,
-      loginAt: DateTime.now(),
-      isLoggedIn: true,
-    );
-    await _sessionBox.put('current', session);
-
-    return {'success': true, 'user': user};
+    return {'success': false, 'message': result['message'] ?? 'Login failed.'};
   }
 
   // ── Register ───────────────────────────────────────────────────────────────
@@ -77,76 +36,57 @@ class AuthService {
     String? designation,
     String? institution,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 800));
+    final result = await _api.post('/auth/register', {
+      'name':        name,
+      'email':       email,
+      'username':    username,
+      'password':    password,
+      'designation': designation ?? '',
+      'institution': institution ?? '',
+    }, auth: false);
 
-    final emailLower = email.trim().toLowerCase();
-    final usernameLower = username.trim().toLowerCase();
-
-    // Check duplicates
-    for (final u in _usersBox.values) {
-      if (u.email.toLowerCase() == emailLower) {
-        return {'success': false, 'message': 'An account with this email already exists.'};
-      }
-      if (u.username?.toLowerCase() == usernameLower) {
-        return {'success': false, 'message': 'This username is already taken.'};
-      }
-    }
-
-    final id = 'usr_${DateTime.now().millisecondsSinceEpoch}';
-    final newUser = UserHiveModel(
-      id: id,
-      name: name.trim(),
-      email: emailLower,
-      username: usernameLower,
-      designation: designation?.trim(),
-      institution: institution?.trim(),
-      passwordHash: _hashPassword(password),
-    );
-
-    await _usersBox.put(id, newUser);
-
-    // Init settings for new user
-    if (_settingsBox.get('app_settings') == null) {
-      await _settingsBox.put(
-        'app_settings',
-        SettingsHiveModel(lastSyncAt: DateTime.now()),
-      );
-    }
-
-    return {'success': true, 'message': 'Account created successfully!'};
+    return {
+      'success': result['success'] == true,
+      'message': result['message'] ?? '',
+    };
   }
 
   // ── Session ────────────────────────────────────────────────────────────────
-  bool isLoggedIn() {
-    final session = _sessionBox.get('current');
-    return session?.isLoggedIn == true;
+  Future<void> _saveSession(String token, UserModel user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(AppConstants.tokenKey,  token);
+    await prefs.setString(AppConstants.userKey,   jsonEncode(user.toJson()));
+    await prefs.setBool(AppConstants.isLoggedKey, true);
   }
 
-  UserHiveModel? getCurrentUser() {
-    final session = _sessionBox.get('current');
-    if (session == null || !session.isLoggedIn) return null;
-    return _usersBox.get(session.userId);
+  Future<bool> isLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(AppConstants.isLoggedKey) ?? false;
   }
 
-  String? getToken() {
-    return _sessionBox.get('current')?.token;
+  Future<UserModel?> getCachedUser() async {
+    final prefs   = await SharedPreferences.getInstance();
+    final userStr = prefs.getString(AppConstants.userKey);
+    if (userStr == null) return null;
+    return UserModel.fromJson(jsonDecode(userStr));
+  }
+
+  Future<UserModel?> fetchCurrentUser() async {
+    final result = await _api.get('/auth/me');
+    if (result['success'] == true) {
+      final user = UserModel.fromJson(result['data']);
+      // Refresh cache
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(AppConstants.userKey, jsonEncode(user.toJson()));
+      return user;
+    }
+    return null;
   }
 
   Future<void> logout() async {
-    final session = _sessionBox.get('current');
-    if (session != null) {
-      session.isLoggedIn = false;
-      await session.save();
-    }
-  }
-
-  // ── Settings ───────────────────────────────────────────────────────────────
-  SettingsHiveModel getSettings() {
-    return _settingsBox.get('app_settings') ??
-        SettingsHiveModel(lastSyncAt: DateTime.now());
-  }
-
-  Future<void> updateSettings(SettingsHiveModel settings) async {
-    await _settingsBox.put('app_settings', settings);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(AppConstants.tokenKey);
+    await prefs.remove(AppConstants.userKey);
+    await prefs.setBool(AppConstants.isLoggedKey, false);
   }
 }

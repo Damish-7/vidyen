@@ -1,49 +1,68 @@
 // lib/controllers/abstracts_controller.dart
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
-import '../models/hive_models/abstract_hive_model.dart';
-import '../utils/hive_boxes.dart';
+import '../models/abstract_model.dart';
+import '../services/api_service.dart';
 
 class AbstractsController extends GetxController {
-  Box<AbstractHiveModel> get _box => Hive.box<AbstractHiveModel>(HiveBoxes.abstracts);
+  final ApiService _api = ApiService();
 
-  final RxList<AbstractHiveModel> abstracts = <AbstractHiveModel>[].obs;
-  final RxString selectedFilter = 'All'.obs;
-  final RxString selectedCategory = 'All'.obs;
+  final RxList<AbstractModel> abstracts = <AbstractModel>[].obs;
   final RxBool isLoading = false.obs;
+  final RxString error = ''.obs;
+  final RxString selectedFilter   = 'All'.obs;
+  final RxString selectedCategory = 'All'.obs;
 
-  final List<String> filters = ['All', 'Accepted', 'Pending', 'Rejected'];
+  final RxInt totalCount    = 0.obs;
+  final RxInt acceptedCount = 0.obs;
+  final RxInt pendingCount  = 0.obs;
+  final RxInt rejectedCount = 0.obs;
+
+  final List<String> filters    = ['All', 'Accepted', 'Pending', 'Rejected'];
   final List<String> categories = ['All', 'Oncology', 'Endocrinology',
       'Neurology', 'Digital Health', 'Haematology'];
 
   @override
   void onInit() {
     super.onInit();
-    loadAbstracts();
+    fetchAbstracts();
   }
 
-  void loadAbstracts() {
+  Future<void> fetchAbstracts() async {
     isLoading.value = true;
-    abstracts.value = _box.values.toList()
-      ..sort((a, b) => b.submittedAt.compareTo(a.submittedAt));
+    error.value = '';
+
+    final params = <String>[];
+    if (selectedFilter.value != 'All')
+      params.add('status=${selectedFilter.value}');
+    if (selectedCategory.value != 'All')
+      params.add('category=${selectedCategory.value}');
+    final query = params.isEmpty ? '' : '?${params.join('&')}';
+
+    final result = await _api.get('/abstracts$query');
     isLoading.value = false;
+
+    if (result['success'] == true) {
+      final data = result['data'];
+      abstracts.value = (data['abstracts'] as List)
+          .map((j) => AbstractModel.fromJson(j))
+          .toList();
+      final stats   = data['stats'];
+      totalCount.value    = stats['total']    ?? 0;
+      acceptedCount.value = stats['accepted'] ?? 0;
+      pendingCount.value  = stats['pending']  ?? 0;
+      rejectedCount.value = stats['rejected'] ?? 0;
+    } else {
+      error.value = result['message'] ?? 'Failed to load abstracts.';
+    }
   }
 
-  List<AbstractHiveModel> get filtered {
-    return abstracts.where((a) {
-      final statusMatch = selectedFilter.value == 'All' ||
-          a.status.toLowerCase() == selectedFilter.value.toLowerCase();
-      final categoryMatch = selectedCategory.value == 'All' ||
-          a.category == selectedCategory.value;
-      return statusMatch && categoryMatch;
-    }).toList();
+  void setFilter(String f) {
+    selectedFilter.value = f;
+    fetchAbstracts();
   }
 
-  void setFilter(String f) => selectedFilter.value = f;
-  void setCategory(String c) => selectedCategory.value = c;
-
-  int get totalCount => abstracts.length;
-  int get acceptedCount => abstracts.where((a) => a.status == 'accepted').length;
-  int get pendingCount  => abstracts.where((a) => a.status == 'pending').length;
-  int get rejectedCount => abstracts.where((a) => a.status == 'rejected').length;
+  void setCategory(String c) {
+    selectedCategory.value = c;
+    fetchAbstracts();
+  }
 }

@@ -1,55 +1,69 @@
 // lib/controllers/workshop_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
-import '../models/hive_models/workshop_hive_model.dart';
-import '../utils/hive_boxes.dart';
+import '../models/workshop_model.dart';
+import '../services/api_service.dart';
 
 class WorkshopController extends GetxController {
-  Box<WorkshopHiveModel> get _box => Hive.box<WorkshopHiveModel>(HiveBoxes.workshops);
+  final ApiService _api = ApiService();
 
-  final RxList<WorkshopHiveModel> workshops = <WorkshopHiveModel>[].obs;
+  final RxList<WorkshopModel> workshops = <WorkshopModel>[].obs;
   final RxBool isLoading = false.obs;
+  final RxString error = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadWorkshops();
+    fetchWorkshops();
   }
 
-  void loadWorkshops() {
-    workshops.value = _box.values.toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+  Future<void> fetchWorkshops() async {
+    isLoading.value = true;
+    error.value = '';
+    final result = await _api.get('/workshops');
+    isLoading.value = false;
+    if (result['success'] == true) {
+      workshops.value = (result['data'] as List)
+          .map((j) => WorkshopModel.fromJson(j))
+          .toList();
+    } else {
+      error.value = result['message'] ?? 'Failed to load workshops.';
+    }
   }
 
-  Future<void> toggleRegistration(WorkshopHiveModel workshop) async {
-    if (workshop.isFull && !workshop.isRegistered) {
-      Get.snackbar('Workshop Full',
-          'This workshop has reached maximum capacity.',
+  Future<void> toggleRegistration(WorkshopModel workshop) async {
+    if (workshop.isFull) {
+      Get.snackbar('Workshop Full', 'This workshop has reached maximum capacity.',
           backgroundColor: const Color(0xFFFF4D6D),
-          colorText: const Color(0xFFF0F4FF),
+          colorText: Colors.white,
           snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(16),
-          borderRadius: 12);
+          margin: const EdgeInsets.all(16), borderRadius: 12);
       return;
     }
-    workshop.isRegistered = !workshop.isRegistered;
-    workshop.registeredCount += workshop.isRegistered ? 1 : -1;
-    await workshop.save();
-    loadWorkshops();
-    Get.snackbar(
-      workshop.isRegistered ? 'Registered!' : 'Registration Cancelled',
-      workshop.isRegistered
-          ? 'You are registered for "${workshop.title}"'
-          : 'You have been removed from "${workshop.title}"',
-      backgroundColor: workshop.isRegistered
-          ? const Color(0xFF00C9B1)
-          : const Color(0xFF4F8EF7),
-      colorText: const Color(0xFF060E1E),
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
-    );
+
+    final result = workshop.isRegistered
+        ? await _api.delete('/workshops/${workshop.id}/register')
+        : await _api.post('/workshops/${workshop.id}/register', {});
+
+    if (result['success'] == true) {
+      Get.snackbar(
+        workshop.isRegistered ? 'Cancelled' : 'Booked!',
+        result['message'] ?? '',
+        backgroundColor: workshop.isRegistered
+            ? const Color(0xFF4F8EF7)
+            : const Color(0xFF00C9B1),
+        colorText: const Color(0xFF060E1E),
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16), borderRadius: 12,
+      );
+      await fetchWorkshops();
+    } else {
+      Get.snackbar('Error', result['message'] ?? 'Something went wrong.',
+          backgroundColor: const Color(0xFFFF4D6D),
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16), borderRadius: 12);
+    }
   }
 
   int get registeredCount => workshops.where((w) => w.isRegistered).length;
