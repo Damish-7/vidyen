@@ -26,6 +26,7 @@ $routes = [
     'GET /abstracts/{id}'       => 'AbstractsController@show',
 
     'GET /preconf'              => 'PreConfController@index',
+    'POST /preconf'             => 'PreConfController@store',
     'POST /preconf/{id}/register'   => 'PreConfController@register',
     'DELETE /preconf/{id}/register' => 'PreConfController@unregister',
 

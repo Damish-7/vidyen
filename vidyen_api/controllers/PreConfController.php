@@ -90,4 +90,46 @@ class PreConfController {
 
         respond(true, null, 'Registration cancelled.');
     }
+
+    // POST /preconf — Create new session
+    public function store(array $params): void {
+        requireAuth(); // any logged-in user can propose a session
+
+        $body = getBody();
+
+        $title           = sanitize($body['title']           ?? '');
+        $speaker         = sanitize($body['speaker']         ?? '');
+        $designation     = sanitize($body['designation']     ?? '');
+        $description     = sanitize($body['description']     ?? '');
+        $session_date    = sanitize($body['session_date']    ?? '');
+        $session_time    = sanitize($body['session_time']    ?? '');
+        $venue           = sanitize($body['venue']           ?? '');
+        $max_participants = (int)($body['max_participants']  ?? 50);
+
+        if (!$title || !$speaker || !$session_date || !$session_time || !$venue) {
+            respondError('Title, speaker, date, time and venue are required.');
+        }
+
+        // Validate date format
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $session_date)) {
+            respondError('Invalid date format. Use YYYY-MM-DD.');
+        }
+
+        if ($max_participants < 1 || $max_participants > 500) {
+            $max_participants = 50;
+        }
+
+        $stmt = $this->db->prepare(
+            'INSERT INTO preconf_sessions
+             (title, speaker, designation, description, session_date, session_time, venue, max_participants)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([
+            $title, $speaker, $designation, $description,
+            $session_date, $session_time, $venue, $max_participants
+        ]);
+
+        respond(true, ['id' => $this->db->lastInsertId()],
+            'Session created successfully.', 201);
+    }
 }
