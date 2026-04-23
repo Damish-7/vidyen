@@ -18,7 +18,7 @@ class AbstractsScreen extends StatelessWidget {
     return Stack(children: [
       Column(children: [
 
-        // ── Summary bar ──────────────────────────────────────────────────
+       // ── Summary bar ──────────────────────────────────────────────────
         Obx(() => Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               color: AppColors.primary,

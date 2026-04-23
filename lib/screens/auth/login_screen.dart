@@ -38,13 +38,13 @@ class LoginScreen extends StatelessWidget {
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                     Text("Don't have an account? ",
                         style: TextStyle(
-                            color: AppColors.textSecondary,
+                            color: const Color.fromARGB(255, 201, 215, 234),
                             fontSize: r.sp(13), fontFamily: 'Sora')),
                     GestureDetector(
                       onTap: () => Get.toNamed(AppRoutes.register),
                       child: Text('Register',
                           style: TextStyle(
-                              color: AppColors.secondary,
+                              color: const Color.fromARGB(255, 210, 212, 217),
                               fontSize: r.sp(13),
                               fontWeight: FontWeight.w700,
                               fontFamily: 'Sora')),

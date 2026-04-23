@@ -60,7 +60,7 @@ class HomeScreen extends StatelessWidget {
                       Text(user?.name ?? 'Attendee',
                           style: TextStyle(fontFamily: 'Sora',
                               fontSize: r.sp(20), fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary)),
+                              color: const Color.fromARGB(255, 231, 233, 238))),
                       if (user?.designation != null) ...[
                         const SizedBox(height: 2),
                         Text(user!.designation!,
@@ -153,47 +153,47 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 28),
 
               // ── Schedule ─────────────────────────────────────────────────
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                      colors: [Color(0xFF0A2540), Color(0xFF091C35)]),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                      color: AppColors.accent.withOpacity(0.2)),
-                ),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                  Row(children: [
-                    const Icon(Icons.calendar_month_outlined,
-                        color: AppColors.accent, size: 18),
-                    const SizedBox(width: 8),
-                    Text('Conference Schedule',
-                        style: TextStyle(fontFamily: 'Sora',
-                            fontSize: r.sp(14), fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary)),
-                  ]),
-                  const SizedBox(height: 14),
-                  _ScheduleRow(day: 'Day 1 — Mar 14',
-                      label: 'Pre-Conference Sessions',
-                      color: AppColors.accent, r: r),
-                  const SizedBox(height: 8),
-                  _ScheduleRow(day: 'Day 2 — Mar 15',
-                      label: 'Workshops & Keynote',
-                      color: AppColors.secondary, r: r),
-                  const SizedBox(height: 8),
-                  _ScheduleRow(day: 'Day 3 — Mar 16',
-                      label: 'Oral & Poster Presentations',
-                      color: AppColors.highlight, r: r),
-                  const SizedBox(height: 8),
-                  _ScheduleRow(day: 'Day 4 — Mar 17',
-                      label: 'Closing & Certificates',
-                      color: const Color(0xFFBB86FC), r: r),
-                ]),
-              ),
+              // Container(
+              //   padding: const EdgeInsets.all(18),
+              //   decoration: BoxDecoration(
+              //     gradient: const LinearGradient(
+              //         colors: [Color(0xFF0A2540), Color(0xFF091C35)]),
+              //     borderRadius: BorderRadius.circular(16),
+              //     border: Border.all(
+              //         color: AppColors.accent.withOpacity(0.2)),
+              //   ),
+              //   child: Column(
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       children: [
+              //     Row(children: [
+              //       const Icon(Icons.calendar_month_outlined,
+              //           color: AppColors.accent, size: 18),
+              //       const SizedBox(width: 8),
+              //       Text('Conference Schedule',
+              //           style: TextStyle(fontFamily: 'Sora',
+              //               fontSize: r.sp(14), fontWeight: FontWeight.w700,
+              //               color: AppColors.textPrimary)),
+              //     ]),
+              //     const SizedBox(height: 14),
+              //     _ScheduleRow(day: 'Day 1 — Mar 14',
+              //         label: 'Pre-Conference Sessions',
+              //         color: AppColors.accent, r: r),
+              //     const SizedBox(height: 8),
+              //     _ScheduleRow(day: 'Day 2 — Mar 15',
+              //         label: 'Workshops & Keynote',
+              //         color: AppColors.secondary, r: r),
+              //     const SizedBox(height: 8),
+              //     _ScheduleRow(day: 'Day 3 — Mar 16',
+              //         label: 'Oral & Poster Presentations',
+              //         color: AppColors.highlight, r: r),
+              //     const SizedBox(height: 8),
+              //     _ScheduleRow(day: 'Day 4 — Mar 17',
+              //         label: 'Closing & Certificates',
+              //         color: const Color(0xFFBB86FC), r: r),
+              //   ]),
+              // ),
 
-              const SizedBox(height: 20),
+              //const SizedBox(height: 20),
             ]),
           ),
         ),
