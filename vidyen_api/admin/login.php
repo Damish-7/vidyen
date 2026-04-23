@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <button type="submit" class="sub">Sign In →</button>
   </form>
 
-  <p class="hint">Default: <code>admin</code> / <code>vidyen@2024</code></p>
+  <!--<p class="hint">Default: <code>admin</code> / <code>vidyen@2024</code></p>-->
 </div>
 </body>
 </html>

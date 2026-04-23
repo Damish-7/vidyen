@@ -86,4 +86,55 @@ class WorkshopController {
 
         respond(true, null, 'Registration cancelled.');
     }
+
+    // POST /workshops — Create new workshop
+    public function store(array $params): void {
+        requireAuth();
+
+        $body = getBody();
+
+        $title           = sanitize($body['title']           ?? '');
+        $facilitator     = sanitize($body['facilitator']     ?? '');
+        $designation     = sanitize($body['designation']     ?? '');
+        $description     = sanitize($body['description']     ?? '');
+        $workshop_date   = sanitize($body['workshop_date']   ?? '');
+        $workshop_time   = sanitize($body['workshop_time']   ?? '');
+        $duration        = sanitize($body['duration']        ?? '');
+        $venue           = sanitize($body['venue']           ?? '');
+        $max_participants = (int)($body['max_participants']  ?? 30);
+        $topics          = $body['topics'] ?? [];
+
+        if (!$title || !$facilitator || !$workshop_date || !$workshop_time || !$venue) {
+            respondError('Title, facilitator, date, time and venue are required.');
+        }
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $workshop_date)) {
+            respondError('Invalid date format. Use YYYY-MM-DD.');
+        }
+
+        if ($max_participants < 1 || $max_participants > 500) {
+            $max_participants = 30;
+        }
+
+        // Encode topics array as JSON
+        $topicsJson = json_encode(
+            is_array($topics) ? array_values($topics) : []
+        );
+
+        $stmt = $this->db->prepare(
+            'INSERT INTO workshops
+             (title, facilitator, designation, description,
+              workshop_date, workshop_time, duration, venue,
+              topics, max_participants)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([
+            $title, $facilitator, $designation, $description,
+            $workshop_date, $workshop_time, $duration, $venue,
+            $topicsJson, $max_participants,
+        ]);
+
+        respond(true, ['id' => $this->db->lastInsertId()],
+            'Workshop created successfully.', 201);
+    }
 }

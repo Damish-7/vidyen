@@ -30,7 +30,8 @@ $routes = [
     'POST /preconf/{id}/register'   => 'PreConfController@register',
     'DELETE /preconf/{id}/register' => 'PreConfController@unregister',
 
-    'GET /workshops'            => 'WorkshopController@index',
+    'GET /workshops'                   => 'WorkshopController@index',
+    'POST /workshops'                  => 'WorkshopController@store',
     'POST /workshops/{id}/register'   => 'WorkshopController@register',
     'DELETE /workshops/{id}/register' => 'WorkshopController@unregister',
 
