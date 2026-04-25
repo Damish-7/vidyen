@@ -27,6 +27,7 @@ class ApiService {
   }
 
   // ── Core request methods ───────────────────────────────────────────────────
+  
   Future<Map<String, dynamic>> get(String path) async {
     try {
       final res = await http.get(
