@@ -272,24 +272,24 @@ class _QuickCard extends StatelessWidget {
   }
 }
 
-class _ScheduleRow extends StatelessWidget {
-  final String day, label;
-  final Color color;
-  final Responsive r;
-  const _ScheduleRow({required this.day, required this.label,
-      required this.color, required this.r});
+// class _ScheduleRow extends StatelessWidget {
+//   final String day, label;
+//   final Color color;
+//   final Responsive r;
+//   const _ScheduleRow({required this.day, required this.label,
+//       required this.color, required this.r});
 
-  @override
-  Widget build(BuildContext context) => Row(children: [
-        Container(width: 3, height: 36,
-            decoration: BoxDecoration(color: color,
-                borderRadius: BorderRadius.circular(2))),
-        const SizedBox(width: 12),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(day, style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(11),
-              color: color, fontWeight: FontWeight.w600)),
-          Text(label, style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(12),
-              color: AppColors.textPrimary)),
-        ]),
-      ]);
-}
+//   @override
+//   Widget build(BuildContext context) => Row(children: [
+//         Container(width: 3, height: 36,
+//             decoration: BoxDecoration(color: color,
+//                 borderRadius: BorderRadius.circular(2))),
+//         const SizedBox(width: 12),
+//         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+//           Text(day, style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(11),
+//               color: color, fontWeight: FontWeight.w600)),
+//           Text(label, style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(12),
+//               color: AppColors.textPrimary)),
+//         ]),
+//       ]);
+// }

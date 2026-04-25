@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import '../../controllers/add_workshop_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/responsive.dart';
-import '../../widgets/gradient_button.dart';
+//import '../../widgets/gradient_button.dart';
 import '../../widgets/vidyen_text_field.dart';
 
 class AddWorkshopScreen extends StatelessWidget {
