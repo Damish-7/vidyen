@@ -81,7 +81,7 @@ class WorkshopScreen extends StatelessWidget {
             height: 52,
             padding: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [AppColors.highlight, Color(0xFFFFB830)]),
+              gradient: const LinearGradient(colors: [AppColors.highlight, Color.fromARGB(255, 14, 13, 10)]),
               borderRadius: BorderRadius.circular(26),
               boxShadow: [BoxShadow(color: AppColors.highlight.withOpacity(0.4), blurRadius: 16, offset: const Offset(0, 6))],
             ),
@@ -121,7 +121,7 @@ class _WorkshopCard extends StatelessWidget {
           height: 4,
           decoration: BoxDecoration(
             gradient: LinearGradient(colors: workshop.isRegistered
-                ? [AppColors.highlight, const Color(0xFFFFB830)]
+                ? [AppColors.highlight, const Color.fromARGB(255, 22, 20, 15)]
                 : [AppColors.textMuted.withOpacity(0.3), AppColors.textMuted.withOpacity(0.1)]),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
           ),
@@ -187,8 +187,8 @@ class _WorkshopCard extends StatelessWidget {
                 width: double.infinity, height: 44,
                 decoration: BoxDecoration(
                   gradient: isFull ? null : (workshop.isRegistered
-                      ? const LinearGradient(colors: [Color(0xFF1E3A5F), Color(0xFF1E3A5F)])
-                      : const LinearGradient(colors: [AppColors.highlight, Color(0xFFFFB830)])),
+                      ? const LinearGradient(colors: [Color(0xFF1E3A5F), Color.fromARGB(255, 29, 53, 83)])
+                      : const LinearGradient(colors: [Color.fromARGB(255, 153, 236, 249), Color.fromARGB(255, 9, 9, 8)])),
                   color: isFull ? AppColors.textMuted.withOpacity(0.15) : null,
                   borderRadius: BorderRadius.circular(12),
                   border: workshop.isRegistered && !isFull
@@ -197,7 +197,7 @@ class _WorkshopCard extends StatelessWidget {
                 child: Center(child: Text(
                   isFull ? 'Workshop Full' : workshop.isRegistered ? 'Cancel Registration' : 'Book My Seat',
                   style: TextStyle(fontFamily: 'Sora', fontSize: r.sp(13), fontWeight: FontWeight.w600,
-                      color: isFull ? AppColors.textMuted : (workshop.isRegistered ? AppColors.highlight : AppColors.background)),
+                      color: isFull ? const Color.fromARGB(255, 173, 177, 182) : (workshop.isRegistered ? AppColors.highlight : AppColors.background)),
                 )),
               ),
             ),
