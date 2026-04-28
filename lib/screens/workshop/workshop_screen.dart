@@ -208,6 +208,7 @@ class _WorkshopCard extends StatelessWidget {
   }
 }
 
+
 class _ErrorView extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;

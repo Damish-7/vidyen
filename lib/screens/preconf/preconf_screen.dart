@@ -131,7 +131,7 @@ class PreConfScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [AppColors.accent, Color(0xFF7BA7FF)],
+                colors: [Color.fromARGB(255, 94, 210, 245), Color.fromARGB(255, 13, 28, 58)],
               ),
               borderRadius: BorderRadius.circular(26),
               boxShadow: [
@@ -150,7 +150,7 @@ class PreConfScreen extends StatelessWidget {
                       fontFamily: 'Sora',
                       fontSize: r.sp(13),
                       fontWeight: FontWeight.w700,
-                      color: AppColors.background)),
+                      color: const Color.fromARGB(255, 255, 255, 255))),
             ]),
           ),
         ),

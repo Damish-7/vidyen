@@ -150,7 +150,7 @@ class AbstractsScreen extends StatelessWidget {
               gradient: AppColors.primaryGradient,
               borderRadius: BorderRadius.circular(26),
               boxShadow: [BoxShadow(
-                  color: AppColors.secondary.withOpacity(0.4),
+                  color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.4),
                   blurRadius: 16, offset: const Offset(0, 6))],
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [

@@ -9,7 +9,7 @@ class AppColors {
   static const Color highlight   = Color(0xFF22D3EE); // Cyan glow (modern touch)
 
   // 🤍 Backgrounds (clean but not flat)
-  static const Color background  = Color(0xFFF8FAFC); // Soft white (not harsh)
+  static const Color background  = Color.fromARGB(255, 252, 252, 253); // Soft white (not harsh)
   static const Color surface     = Color(0xFFFFFFFF); // pure white
   static const Color cardBg      = Color(0xFFFFFFFF); // card base
   static const Color inputBg     = Color(0xFFF1F5F9); // subtle input
